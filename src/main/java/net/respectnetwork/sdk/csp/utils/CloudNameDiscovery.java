@@ -90,6 +90,8 @@ public class CloudNameDiscovery
                XDI3Segment.create(cloudName.toString()), epSegments);
          System.out.println("CloudNumber : " + discResult.getCloudNumber());
          System.out.println("xdi endpoint : " + discResult.getXdiEndpointUri());
+         System.out.println("public key (sig) : " + discResult.getSignaturePublicKey());
+         System.out.println("public key (enc) : " + discResult.getEncryptionPublicKey());
          if (discResult.getEndpointUris() != null)
          {
             Set<XDI3Segment> keyset = discResult.getEndpointUris().keySet();
