@@ -9,6 +9,7 @@ import java.util.Set;
 import net.respectnetwork.sdk.csp.ssl.TLSv1Support;
 import xdi2.client.exceptions.Xdi2ClientException;
 import xdi2.core.xri3.CloudName;
+import xdi2.core.xri3.CloudNumber;
 import xdi2.core.xri3.XDI3Segment;
 import xdi2.discovery.XDIDiscoveryClient;
 import xdi2.discovery.XDIDiscoveryResult;
@@ -18,6 +19,9 @@ public class CloudNameDiscovery
 
    /* CHOOSE THE CLOUD NAME HERE */
    private static CloudName          cloudName;
+   
+   /* CHOOSE THE CLOUD NAME HERE */
+   private static CloudNumber          cloudNumber;
 
    private static XDIDiscoveryClient discovery;
 
@@ -46,15 +50,24 @@ public class CloudNameDiscovery
             System.exit(0);
          }
 
-         System.out.print("Enter Cloud Name: ");
-         cloudName = CloudName.create(new BufferedReader(new InputStreamReader(
-               System.in)).readLine());
-
-         if (cloudName == null)
-         {
-            System.err.println("Invalid Cloud Name.");
-            System.exit(0);
-         }
+         System.out.print("Enter Cloud Name/Number: ");
+         
+         String cloudNameOrNumber = new BufferedReader(new InputStreamReader(System.in))
+         .readLine();
+          if(cloudNameOrNumber.contains("UUID") || cloudNameOrNumber.contains("uuid"))
+          {
+             cloudNumber = CloudNumber.create(cloudNameOrNumber);
+          }
+          else if(cloudNameOrNumber.startsWith("=") || cloudNameOrNumber.startsWith("+") )
+          {
+            cloudName = CloudName.create(cloudNameOrNumber);  
+          }
+         
+          if(cloudName == null && cloudNumber == null)
+          {
+             System.out.println("Invalid cloudname/number");
+             System.exit(0);
+          }
          System.out
                .print("Enter EndpointURI address. Type DONE when finished. :");
          BufferedReader br = new BufferedReader(
@@ -86,8 +99,15 @@ public class CloudNameDiscovery
 
       try
       {
-         XDIDiscoveryResult discResult = discovery.discover(
+         XDIDiscoveryResult discResult = null;
+         if (cloudName != null)
+         {
+            discResult = discovery.discover(
                XDI3Segment.create(cloudName.toString()), epSegments);
+         } else if (cloudNumber != null) {
+            discResult = discovery.discover(
+                  XDI3Segment.create(cloudNumber.toString()), epSegments);
+         }         
          System.out.println("CloudNumber : " + discResult.getCloudNumber());
          System.out.println("xdi endpoint : " + discResult.getXdiEndpointUri());
          System.out.println("public key (sig) : " + discResult.getSignaturePublicKey());
